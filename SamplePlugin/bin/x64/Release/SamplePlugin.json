@@ -1,0 +1,18 @@
+{
+  "Author": "Tiraesias cen Graven",
+  "Name": "First Person POV Mod",
+  "InternalName": "SamplePlugin",
+  "AssemblyVersion": "0.0.0.3",
+  "Description": "Binds the Camera to the Players Head Bone (or any others)  \n\nUpcoming Features : Bind Camera Rotation to Bone \n\nIf there are any issues pls harass me on Twitter",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "POV"
+  ],
+  "DalamudApiLevel": 13,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "Punchline": "Binds the Camera to the Players Head Bone (or any others)",
+  "AcceptsFeedback": true
+}
