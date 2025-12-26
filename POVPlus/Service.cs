@@ -17,7 +17,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 
 
-namespace SamplePlugin
+namespace POVPlus
 {
     public class Service
     {

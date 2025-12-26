@@ -3,14 +3,14 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Hypostasis.Game.Structures;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
-using SamplePlugin.Windows;
+using POVPlus.Windows;
 using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 using System.Xml;
 
-namespace SamplePlugin
+namespace POVPlus
 {
     //Not sure if this is actualy required? Hypostatis SEEMS to be the thing that gives me access to the camera. - but I dont think it needs this injection. - what even IS an injection seems to work wtihout it
     //[HypostasisInjection]
@@ -33,7 +33,6 @@ namespace SamplePlugin
 
     public static unsafe class HideBody
     {
-
         private static float CachedDefaultLookAtHeightOffset;
         private static GameObject* PrevCameraTarget;
         private static Vector3 PrevCameraTargetPosition;
@@ -49,15 +48,15 @@ namespace SamplePlugin
 
             ///FIND OUT WHAT SWAP PERSON ACTUALY DOES?
 
-
-
+            
+           
 
             //Service.Log.Information($"=== PlayerBase === {camera->currentHRotation} / {target->Rotation} ===");
 
 
 
             //Log.Information($"CAMERA DETOUR");
-            var newPos = Common.GetBoneWorldPosition(target, (uint)Configuration.BoneToBind) + ((Vector3)target->Position - PrevCameraTargetPosition); ///26 Head 
+            var newPos = Common.GetBoneWorldPosition(target, (uint)MagicNumbers.BoneToBind) + ((Vector3)target->Position - PrevCameraTargetPosition); ///26 Head 
 
 
             /// -------------------- Camera XYZ Offset ---------------------
@@ -71,16 +70,16 @@ namespace SamplePlugin
             float sinY = MathF.Sin(PlayerYaw);
 
             Vector3 rotatedOffset = new Vector3(
-                Configuration.OffsetX * sinY + Configuration.OffsetZ * cosY,
-                Configuration.OffsetY,
-                Configuration.OffsetX * cosY - Configuration.OffsetZ * sinY
+                POVPlus.P.Configuration.OffsetX * sinY + POVPlus.P.Configuration.OffsetZ * cosY,
+                POVPlus.P.Configuration.OffsetY,
+                POVPlus.P.Configuration.OffsetX * cosY - POVPlus.P.Configuration.OffsetZ * sinY
             );
 
-            Vector3 OffsetPos = new Vector3(Configuration.OffsetX + OffsetCalculatedX, Configuration.OffsetY, Configuration.OffsetZ + OffsetCalculatedZ);
+            Vector3 OffsetPos = new Vector3(POVPlus.P.Configuration.OffsetX + OffsetCalculatedX, POVPlus.P.Configuration.OffsetY, POVPlus.P.Configuration.OffsetZ + OffsetCalculatedZ);
 
             newPos = rotatedOffset + newPos;
 
-            camera->minFoV = MainWindow.arrowOffset;
+            camera->minFoV = POVPlus.P.Configuration.FOV;
 
             // GETS THE PLAYER CHARACTER : Service.ClientState.LocalPlayer
 
@@ -106,10 +105,10 @@ namespace SamplePlugin
 
                             var HavokBoneVal = 54;
 
-                            var HavokBoneToBind = (int)Configuration.BoneToBind;
+                            var HavokBoneToBind = (int)MagicNumbers.BoneToBind;
 
-                            var HavokBoneToBindX = (int)Configuration.RotationBindBoneX;
-                            var HavokBoneToBindZ = (int)Configuration.RotationBindBoneZ;
+                            var HavokBoneToBindX = (int)MagicNumbers.RotationBindBoneX;
+                            var HavokBoneToBindZ = (int)MagicNumbers.RotationBindBoneZ;
 
                             if (PartialSkeletonTest != null && 1==1)
                             {
@@ -120,9 +119,9 @@ namespace SamplePlugin
                                     //Gets the bone Name for the UI + Bone Counts
                                     if (1 == 1)
                                     {
-                                        Configuration.RotationBoneValueXName = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones[Configuration.RotationBoneValueX].Name.String;
-                                        Configuration.RotationBoneValueZName = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones[Configuration.RotationBoneValueZ].Name.String;
-                                        Configuration.PlayerBoneCount = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones.Length-1; //-1 needed due to length making 1=0 2=1
+                                        MagicNumbers.RotationBoneValueXName = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones[MagicNumbers.RotationBoneValueX].Name.String;
+                                        MagicNumbers.RotationBoneValueZName = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones[MagicNumbers.RotationBoneValueZ].Name.String;
+                                        MagicNumbers.PlayerBoneCount = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->Skeleton->Bones.Length-1; //-1 needed due to length making 1=0 2=1
                                     }
 
 
@@ -131,9 +130,9 @@ namespace SamplePlugin
                                     {
                                         //Calculates the player CHARACTERS rotation - NO BONE LOGIC HERE
                                         //OUTPUT PlayerXRotationNormalize
-                                        Configuration.PlayerXRotationCurrent = target->Rotation;
-                                        Configuration.PlayerXRotationNormalize = Configuration.PlayerXRotationCurrent - Configuration.PlayerXRotationPrev;
-                                        Configuration.PlayerXRotationPrev = Configuration.PlayerXRotationCurrent;
+                                        MagicNumbers.PlayerXRotationCurrent = target->Rotation;
+                                        MagicNumbers.PlayerXRotationNormalize = MagicNumbers.PlayerXRotationCurrent - MagicNumbers.PlayerXRotationPrev;
+                                        MagicNumbers.PlayerXRotationPrev = MagicNumbers.PlayerXRotationCurrent;
 
 
 
@@ -156,13 +155,13 @@ namespace SamplePlugin
 
                                         //CALCULATE BONE YAW (SIDE SIDE)
                                         //OUTPUT BoneYawRotateOffset
-                                        var BoneRotSource = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->AccessBoneModelSpace(Configuration.RotationBoneValueX, PropagateOrNot.DontPropagate);
-                                        Configuration.CameraQuartCurrent = new Quaternion(BoneRotSource->Rotation.X, BoneRotSource->Rotation.Y, BoneRotSource->Rotation.Z, BoneRotSource->Rotation.W);
-                                        var NormalisedQuart = Quaternion.Normalize(Configuration.CameraQuartCurrent);
+                                        var BoneRotSource = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->AccessBoneModelSpace(MagicNumbers.RotationBoneValueX, PropagateOrNot.DontPropagate);
+                                        MagicNumbers.CameraQuartCurrent = new Quaternion(BoneRotSource->Rotation.X, BoneRotSource->Rotation.Y, BoneRotSource->Rotation.Z, BoneRotSource->Rotation.W);
+                                        var NormalisedQuart = Quaternion.Normalize(MagicNumbers.CameraQuartCurrent);
                                         Vector3 forward = Vector3.Transform(Vector3.UnitZ, NormalisedQuart);
-                                        Configuration.BoneYawRotateCurrent = MathF.Atan2(forward.X, forward.Z);
-                                        var BoneYawRotateOffset = Configuration.BoneYawRotateCurrent - Configuration.BoneYawRotateBefore;
-                                        Configuration.BoneYawRotateBefore = MathF.Atan2(forward.X, forward.Z);
+                                        MagicNumbers.BoneYawRotateCurrent = MathF.Atan2(forward.X, forward.Z);
+                                        var BoneYawRotateOffset = MagicNumbers.BoneYawRotateCurrent - MagicNumbers.BoneYawRotateBefore;
+                                        MagicNumbers.BoneYawRotateBefore = MathF.Atan2(forward.X, forward.Z);
 
                                         //CALCULATE BONE PITCH (UP DOWN)
                                         var sinPitch = 2 * (NormalisedQuart.W * NormalisedQuart.Z + NormalisedQuart.X * NormalisedQuart.Y);
@@ -234,15 +233,15 @@ namespace SamplePlugin
 
 
                                         //Service.Log.Information($"\n Finalyaw {Finalforward} \n Finalpitch {Finalpitch * (180f / MathF.PI)} \n Finalroll {(-Finalroll * (180f / MathF.PI))}");
+                                        
 
-
-                                        Configuration.BonePitchRotateCurrent = -V2Roll + MathF.PI;
+                                        MagicNumbers.BonePitchRotateCurrent = -V2Roll + MathF.PI;
 
                                         //Service.Log.Information($"Current Raw {V2Roll} \n Current : {Configuration.BonePitchRotateCurrent} \n Previous : {(Configuration.BonePitchRotateBefore)} \n Offset Calculation {(Configuration.BonePitchRotateCurrent + 10f) - (Configuration.BonePitchRotateBefore + 10f)}");
 
 
-                                        var BonePitchRotateOffset = (Configuration.BonePitchRotateCurrent + 10f) - (Configuration.BonePitchRotateBefore + 10f);
-                                        Configuration.BonePitchRotateBefore = Configuration.BonePitchRotateCurrent;
+                                        var BonePitchRotateOffset = (MagicNumbers.BonePitchRotateCurrent + 10f) - (MagicNumbers.BonePitchRotateBefore + 10f);
+                                        MagicNumbers.BonePitchRotateBefore = MagicNumbers.BonePitchRotateCurrent;
 
                                         
 
@@ -250,7 +249,7 @@ namespace SamplePlugin
 
 
                                         /// ----------------------------------- YAW (LEFT RIGHT) -----------------------------------
-                                        if (Configuration.RotationBindBoolX == true)
+                                        if (POVPlus.P.Configuration.RotationBindBoolX == true)
                                         {
 
 
@@ -268,20 +267,20 @@ namespace SamplePlugin
                                             var Ismoving = false;
                                             var RightClickMoving = false;
 
-                                            Configuration.CurrentPlayerPosition = target->Position;
-                                            if (Configuration.CurrentPlayerPosition != Configuration.LastPlayerPosition)
+                                            MagicNumbers.CurrentPlayerPosition = target->Position;
+                                            if (MagicNumbers.CurrentPlayerPosition != MagicNumbers.LastPlayerPosition)
                                             {
                                                 Ismoving = true;
                                             }
-                                            Configuration.LastPlayerPosition = target->Position;
+                                            MagicNumbers.LastPlayerPosition = target->Position;
 
                                             if (Ismoving == true && camera->currentHRotation == target->Rotation)
                                             {
-                                                Configuration.RightClickMoving = true;
+                                                MagicNumbers.RightClickMoving = true;
                                             }
                                             else
                                             {
-                                                Configuration.RightClickMoving = false;
+                                                MagicNumbers.RightClickMoving = false;
                                             }
 
                                             //Checks for temporal issues (LAST FRAME NOT MATCHING WHEN TURNING - IDK WHY IT DOES IT BUT IT DO)
@@ -300,9 +299,9 @@ namespace SamplePlugin
 
 
 
-                                            Configuration.TOTALYAW = Configuration.TOTALYAW + BoneYawRotateOffset;
+                                            MagicNumbers.TOTALYAW = MagicNumbers.TOTALYAW + BoneYawRotateOffset;
 
-                                            Configuration.TotalRotationOffsetAddition = Configuration.TotalRotationOffsetAddition - BoneYawRotateOffset;
+                                            MagicNumbers.TotalRotationOffsetAddition = MagicNumbers.TotalRotationOffsetAddition - BoneYawRotateOffset;
 
                                             //camera->hRotationDelta = BoneYawRotateOffset;
 
@@ -310,27 +309,27 @@ namespace SamplePlugin
                                             //Service.Log.Information($"\nOffsetTotal {Configuration.TotalRotationOffsetAddition}  \n processed - offsettotal : {(camera->currentHRotation = camera->currentHRotation + BoneYawRotateOffset) - Configuration.TotalRotationOffsetAddition} \n Camera Rotation {camera->currentHRotation} \n Player Rotation {target->Rotation}");
 
 
-                                            if (Configuration.RightClickMoving == false)
+                                            if (MagicNumbers.RightClickMoving == false)
                                             {
 
-                                                if (Configuration.TemporalYawPrevious == target->Rotation && Ismoving == true)
+                                                if (MagicNumbers.TemporalYawPrevious == target->Rotation && Ismoving == true)
                                                 {
                                                     //Service.Log.Information($" FIX PROCCED ");
 
-                                                    Configuration.RightClickMoving = true;
+                                                    MagicNumbers.RightClickMoving = true;
 
                                                 }
 
-                                                if (Configuration.TemporalYawPrevious == target->Rotation && Ismoving == false)
+                                                if (MagicNumbers.TemporalYawPrevious == target->Rotation && Ismoving == false)
                                                 {
                                                     //Service.Log.Information($" Turning stationary ");
 
-                                                    Configuration.StationaryRotateRight = true;
+                                                    MagicNumbers.StationaryRotateRight = true;
 
                                                 }
                                                 else
                                                 {
-                                                    Configuration.StationaryRotateRight = false;
+                                                    MagicNumbers.StationaryRotateRight = false;
                                                 }
 
 
@@ -344,13 +343,13 @@ namespace SamplePlugin
                                                                                                         // $"\n Minus Value {camera->currentHRotation = camera->currentHRotation - 0.412412f} " +
                                                                                                         // $"\n Final Call {camera->currentHRotation}" +
                                                         $"\n Player Rotation {target->Rotation}" +
-                                                        $"\n Player Location {Configuration.CurrentPlayerPosition}" +
+                                                        $"\n Player Location {MagicNumbers.CurrentPlayerPosition}" +
                                                         $"\n Is moving? {Ismoving}" +
-                                                        $"\n Right Click Moving? {Configuration.RightClickMoving}" +
-                                                        $"\n PREV VALUE {Configuration.TemporalYawPrevious} ");
+                                                        $"\n Right Click Moving? {MagicNumbers.RightClickMoving}" +
+                                                        $"\n PREV VALUE {MagicNumbers.TemporalYawPrevious} ");
                                                 }
 
-                                                Configuration.TemporalYawPrevious = camera->currentHRotation;
+                                                MagicNumbers.TemporalYawPrevious = camera->currentHRotation;
 
 
                                                 //Configuration.TemporalYawPrevious = target->Rotation;
@@ -368,7 +367,7 @@ namespace SamplePlugin
 
 
                                             //Rotates with Right Mouse
-                                            if (Configuration.RightClickMoving == true || Configuration.StationaryRotateRight == true || 1==2)
+                                            if (MagicNumbers.RightClickMoving == true || MagicNumbers.StationaryRotateRight == true || 1==2)
                                             {
 
                                             }
@@ -385,12 +384,12 @@ namespace SamplePlugin
                                         //JUST COMPRESSING EVERYTHING
                                         float finalXrotation=0f;
 
-                                        if (Configuration.Setting_RotateWithplayer == true)
+                                        if (POVPlus.P.Configuration.Setting_RotateWithplayer == true)
                                         {
-                                            finalXrotation = finalXrotation + Configuration.PlayerXRotationNormalize;
+                                            finalXrotation = finalXrotation + MagicNumbers.PlayerXRotationNormalize;
                                         }
 
-                                        if (Configuration.RotationBindBoolX == true)
+                                        if (POVPlus.P.Configuration.RotationBindBoolX == true)
                                         {
                                             finalXrotation = finalXrotation + BoneYawRotateOffset;
                                         }
@@ -416,14 +415,14 @@ namespace SamplePlugin
 
                                         // ----------------------------------- PITCH (UP DOWN) -----------------------------------
 
-                                        if (Configuration.RotationBindBoolZ == false)
+                                        if (POVPlus.P.Configuration.RotationBindBoolZ == false)
                                         {
-                                            Common.CameraManager->worldCamera->maxVRotation = Configuration.PreviousMaxVRotation;
-                                            Common.CameraManager->worldCamera->minVRotation = Configuration.PreviousMinVRotation;
-                                            Common.CameraManager->worldCamera->tilt = Configuration.PreviousTilt;
+                                            Common.CameraManager->worldCamera->maxVRotation = MagicNumbers.PreviousMaxVRotation;
+                                            Common.CameraManager->worldCamera->minVRotation = MagicNumbers.PreviousMinVRotation;
+                                            Common.CameraManager->worldCamera->tilt = MagicNumbers.PreviousTilt;
                                         }
                                         
-                                        if (Configuration.RotationBindBoolZ == true)
+                                        if (POVPlus.P.Configuration.RotationBindBoolZ == true)
                                         {
 
 
@@ -472,7 +471,7 @@ namespace SamplePlugin
                                         /// Fixes the weird camera issues with PrevCameraTargetPosition
 
 
-                                        var CameraLocationTest = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->AccessBoneModelSpace(Configuration.RotationBoneValueX, PropagateOrNot.DontPropagate);
+                                        var CameraLocationTest = PartialSkeletonTest->GetHavokPose(HavokPoseVal)->AccessBoneModelSpace(MagicNumbers.RotationBoneValueX, PropagateOrNot.DontPropagate);
 
                                         var CameraLocationTest2 = CameraLocationTest->Translation;
 
@@ -519,11 +518,11 @@ namespace SamplePlugin
 
             Service.Log.Information($"===CALLED INIT===");
 
-            Configuration.PreviousMaxVRotation = Common.CameraManager->worldCamera->maxVRotation;
-            Configuration.PreviousMinVRotation = Common.CameraManager->worldCamera->minVRotation;
-            Configuration.PreviousCurrentFoV = Common.CameraManager->worldCamera->currentFoV;
-            Configuration.PreviousTilt = Common.CameraManager->worldCamera->tilt;
-            Configuration.PreviousMinFOV = Common.CameraManager->worldCamera->minFoV;
+            MagicNumbers.PreviousMaxVRotation = Common.CameraManager->worldCamera->maxVRotation;
+            MagicNumbers.PreviousMinVRotation = Common.CameraManager->worldCamera->minVRotation;
+            MagicNumbers.PreviousCurrentFoV = Common.CameraManager->worldCamera->currentFoV;
+            MagicNumbers.PreviousTilt = Common.CameraManager->worldCamera->tilt;
+            MagicNumbers.PreviousMinFOV = Common.CameraManager->worldCamera->minFoV;
 
 
         }
@@ -536,11 +535,11 @@ namespace SamplePlugin
             //Revert the chaos to what it was before the plugin was innitialised
             Common.CameraManager->worldCamera->currentVRotation = 0;
             Common.CameraManager->worldCamera->currentVRotation = 0;
-            Common.CameraManager->worldCamera->maxVRotation = Configuration.PreviousMaxVRotation;
-            Common.CameraManager->worldCamera->minVRotation = Configuration.PreviousMinVRotation;
-            Common.CameraManager->worldCamera->currentFoV = Configuration.PreviousCurrentFoV;
-            Common.CameraManager->worldCamera->tilt = Configuration.PreviousTilt;
-            Common.CameraManager->worldCamera->minFoV = Configuration.PreviousMinFOV;
+            Common.CameraManager->worldCamera->maxVRotation = MagicNumbers.PreviousMaxVRotation;
+            Common.CameraManager->worldCamera->minVRotation = MagicNumbers.PreviousMinVRotation;
+            Common.CameraManager->worldCamera->currentFoV = MagicNumbers.PreviousCurrentFoV;
+            Common.CameraManager->worldCamera->tilt = MagicNumbers.PreviousTilt;
+            Common.CameraManager->worldCamera->minFoV = MagicNumbers.PreviousMinFOV;
 
             Service.Log.Information($"===CLOSING===");
 

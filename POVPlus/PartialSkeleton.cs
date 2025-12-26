@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Render;
-using FFXIVClientStructs.Havok.Animation.Rig;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
-using FFXIVClientStructs.Havok.Animation.Rig;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace SamplePlugin
+
+namespace POVPlus
 {
     public unsafe class PartialSkeletonn(Skeleton skeleton, int id)
     {
