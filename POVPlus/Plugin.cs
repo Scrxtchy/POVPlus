@@ -16,31 +16,22 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace POVPlus
 {
-    public class POVPlus : IDalamudPlugin
+    public class Plugin : IDalamudPlugin
     {
-
         private const string CommandName = "/povplus";
-
         public Configuration Configuration { get; init; }
-        internal static POVPlus P = null!;
 
-        public readonly WindowSystem WindowSystem = new("PovPlus");
+        internal static Plugin P = null!;
+
+        public readonly WindowSystem WindowSystem = new("POVPlus");
         private MainWindow MainWindow { get; init; }
 
         private Hook<CameraBase.Delegates.ShouldDrawGameObject>? ExecuteEmoteHook2 { get; init; }
 
 
+        //public PosingConfiguration Posing { get; set; } = new PosingConfiguration();d
 
-
-        //public PosingConfiguration Posing { get; set; } = new PosingConfiguration();
-
-
-
-
-
-
-
-        public unsafe POVPlus(IDalamudPluginInterface pluginInterface)
+        public unsafe Plugin(IDalamudPluginInterface pluginInterface)
         {
             P = this;
             pluginInterface.Create<Service>();
@@ -53,15 +44,12 @@ namespace POVPlus
 
 
 
-            //ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this, goatImagePath);
-
-            //WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
 
             Service.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "A useful message to display in /xlhelp"
+                HelpMessage = "Opens the Settings"
             });
 
             // Tell the UI system that we want our windows to be drawn throught he window system
@@ -69,12 +57,11 @@ namespace POVPlus
 
             // This adds a button to the plugin installer entry of this plugin which allows
             // toggling the display status of the configuration ui
-            Service.PluginInterface.UiBuilder.OpenConfigUi += ToggleMainUi;
 
             // Adds another button doing the same but for the main ui of the plugin
-            //Service.PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
+            Service.PluginInterface.UiBuilder.OpenConfigUi += ToggleMainUi;
 
-            Service.Log.Information($"===A cool log messageee from {Service.PluginInterface.Manifest.Name}===");
+            //Service.Log.Information($"===A cool log messageee from {Service.PluginInterface.Manifest.Name}===");
 
 
             Service.Log.Information($"HOOK : ShouldDrawGameObjectDetour");
@@ -90,16 +77,31 @@ namespace POVPlus
         {
 
             //Player Data?
-            var localPlayer = Service.ClientState.LocalPlayer;
+            //var localPlayer = Service.ClientState.LocalPlayer;
 
-            var ObjectDebug = gameObject->GetName();
+            //var ObjectDebug = gameObject->GetName();
+
+
+            //if (GlobalVars.HideOwnBody)
+            //{
+            //    return true;
+            //}
 
             return true;
+            
+
         }
 
 
+        public void EnableDrawGameObject()
+        {
+            ExecuteEmoteHook2?.Enable();
+        }
 
-
+        public void DisableDrawGameObject()
+        {
+            ExecuteEmoteHook2?.Disable();
+        }
 
 
         public void Dispose()
@@ -107,7 +109,6 @@ namespace POVPlus
             // Unregister all actions to not leak anythign during disposal of plugin
             Service.PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
             Service.PluginInterface.UiBuilder.OpenConfigUi -= ToggleMainUi;
-            //Service.PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
             WindowSystem.RemoveAllWindows();
 
@@ -126,8 +127,6 @@ namespace POVPlus
 
             //Add turn off logic here
 
-
-
         }
 
         private void OnCommand(string command, string args)
@@ -136,22 +135,15 @@ namespace POVPlus
             MainWindow.Toggle();
         }
 
-        //public void ToggleConfigUi() => ConfigWindow.Toggle();
         public void ToggleMainUi() => MainWindow.Toggle();
-
-
-
-
-
-
 
 
         private unsafe void Initialize()
         {
             //Idk why this fires twice and I cba fighting it rn
-            if (MagicNumbers.InitOnlyOncePls == 0)
+            if (GlobalVars.InitOnlyOncePls == 0)
             {
-                MagicNumbers.InitOnlyOncePls = 1;
+                GlobalVars.InitOnlyOncePls = 1;
                 //Service.Log.Information($"===INITIALIZED IN PLUGIN===");
                 HideBody.Initialize();
             }
