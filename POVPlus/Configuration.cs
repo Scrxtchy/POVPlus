@@ -1,16 +1,9 @@
 using Dalamud.Configuration;
 using POVPlus;
 using System;
-
-
-
-
 namespace POVPlus;
 
-
 ///THIS SHOULD BE TREATED AS PLAYER CONFIGURATION SETTINGS - NOT A PLACE FOR ALL MY RANDOM VARIABLES
-
-
 
 [Serializable]
 
@@ -47,6 +40,7 @@ public class Configuration : IPluginConfiguration
     public bool RotationBindBoolZ = false;
     public bool RotationBindBoolX = false;
 
+    public bool DisableAutoFaceTargetFirstPerson = false;
 
 
     // The below exist just to make saving less cumbersome

@@ -192,6 +192,10 @@ public class MainWindow : Window, IDisposable
 
 
         ImGui.Spacing();
+        if (ImGui.Checkbox("Disable Auto-face Target in First Person", ref Plugin.P.Configuration.DisableAutoFaceTargetFirstPerson))
+            plugin.Configuration.Save();
+        
+        ImGui.Spacing();
         ImGui.Dummy(new Vector2(0, 20));
 
         ImGui.TextUnformatted($"EXPERIMENTAL BELOW - Causes rotation issues when moving while holding right mouse button");

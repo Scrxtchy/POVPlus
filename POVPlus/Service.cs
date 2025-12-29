@@ -30,6 +30,7 @@ namespace POVPlus
         [PluginService] public static IPluginLog Log { get; private set; } = null!;
         [PluginService] public static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
         [PluginService] public static IFramework Framework { get; private set; } = null!;
+        [PluginService] public static IGameConfig GameConfig { get; private set; } = null!;
 
         public unsafe GameSkeleton* GameSkeleton { get; init; }
 
