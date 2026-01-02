@@ -1,4 +1,5 @@
 using Dalamud.Configuration;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Hypostasis.Game.Structures;
 using System;
 using System.Diagnostics;
@@ -27,6 +28,8 @@ namespace POVPlus
 
         //Core Stuff I Think?
         public static GameCamera PlayersCamera;
+        public static IPlayerCharacter Player;
+        public static bool EnableAngleDelta = true;
 
         //Control Params
         //public static bool Setting_ModEnabled = true;
@@ -100,7 +103,6 @@ namespace POVPlus
 
         //Conditional Body Hiding
         public static bool HideOwnBody = true;
-
 
     }
 }

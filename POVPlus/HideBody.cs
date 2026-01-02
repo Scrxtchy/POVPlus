@@ -84,49 +84,79 @@ namespace POVPlus
                     default:
                     case 0:
                         if (Plugin.P.Configuration.DisableAutoFaceTargetFirstPerson && Service.GameConfig.UiControl.GetBool("AutoFaceTargetOnAction") != false)
-                                Service.GameConfig.UiControl.Set("AutoFaceTargetOnAction", false);
+                            Service.GameConfig.UiControl.Set("AutoFaceTargetOnAction", false);
                         break;
                 }
             }
             //camera->VTable.getCameraPosition.Original(camera, target, position, swapPerson);
 
             //Log.Information($"CAMERA DETOUR");
-            var newPos = Common.GetBoneWorldPosition(target, (uint)Plugin.P.Configuration.BoneToBind) + ((Vector3)target->Position - PrevCameraTargetPosition); ///26 Head 
 
 
             /// -------------------- Camera XYZ Offset ---------------------
             /// 
 
-
-
-            float PlayerYaw = target->Rotation;
-
-            Plugin.P.EnableDrawGameObject();
-
-
-
-
-            float cosY = MathF.Cos(PlayerYaw);
-            float sinY = MathF.Sin(PlayerYaw);
-
-            Vector3 rotatedOffset = new Vector3(
-                Plugin.P.Configuration.OffsetX * sinY + Plugin.P.Configuration.OffsetZ * cosY,
-                Plugin.P.Configuration.OffsetY,
-                Plugin.P.Configuration.OffsetX * cosY - Plugin.P.Configuration.OffsetZ * sinY
-            );
-
-            Vector3 OffsetPos = new Vector3(Plugin.P.Configuration.OffsetX + OffsetCalculatedX, Plugin.P.Configuration.OffsetY, Plugin.P.Configuration.OffsetZ + OffsetCalculatedZ);
-
-            newPos = rotatedOffset + newPos;
-
-            camera->minFoV = Plugin.P.Configuration.Setting_FOV;
-
             // GETS THE PLAYER CHARACTER : Service.ClientState.LocalPlayer
 
-            var player = Service.ClientState.LocalPlayer;
+            var player = Service.ObjectTable.LocalPlayer;
+
+
             if (player != null)
             {
+                GlobalVars.Player = player;
                 //if (player is ICharacter) { Service.Log.Information($"=== IS ICharacter === {player.Name} ==="); }
+
+
+                /// -------------------- Camera XYZ Offset ---------------------
+                /// 
+
+                float PlayerYaw = target->Rotation;
+
+                Plugin.P.EnableDrawGameObject();
+
+                Vector3 CameraDeltaOffset()
+                {
+                    float cameraYaw = camera->currentHRotation;
+                    if (camera->isFlipped == 1)
+                        cameraYaw += float.Pi;
+
+                    if (!Plugin.P.Configuration.OffsetCameraFromXAngle || camera->mode != 0)
+                        return Vector3.Zero;
+
+                    float angleDelta = MathF.Atan2(
+                        MathF.Sin(cameraYaw - player.Rotation),
+                        MathF.Cos(cameraYaw - player.Rotation)
+                    );
+
+                    float lateral = MathF.Sin((float)(angleDelta * 0.07));
+
+                    float cosY = MathF.Cos(player.Rotation);
+                    float sinY = MathF.Sin(player.Rotation);
+
+                    Vector3 right = new Vector3(cosY, 0f, -sinY);
+
+                    return right * lateral;
+                }
+
+                float cosY = MathF.Cos(PlayerYaw);
+                float sinY = MathF.Sin(PlayerYaw);
+
+
+                // + (camera->mode == 5 ? (float)((camera->currentHRotation - player.Rotation) * 0.05) : 0))
+
+                Vector3 rotatedOffset = new Vector3(
+                    Plugin.P.Configuration.OffsetX * sinY + Plugin.P.Configuration.OffsetZ * cosY,
+                    Plugin.P.Configuration.OffsetY,
+                    Plugin.P.Configuration.OffsetX * cosY - Plugin.P.Configuration.OffsetZ * sinY
+                );
+
+                //Vector3 OffsetPos = new Vector3(Plugin.P.Configuration.OffsetX + OffsetCalculatedX, Plugin.P.Configuration.OffsetY, Plugin.P.Configuration.OffsetZ + OffsetCalculatedZ);
+                GlobalVars.PlayersCamera = *camera;
+
+
+                var newPos = Common.GetBoneWorldPosition(target, (uint)Plugin.P.Configuration.BoneToBind) + ((Vector3)target->Position - PrevCameraTargetPosition); ///26 Head 
+
+                newPos = rotatedOffset + newPos + CameraDeltaOffset();
 
                 var PlayerBase = GetCharacterBase(player);
                 if (PlayerBase != null)

@@ -1,12 +1,9 @@
-using System;
-using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
-using Lumina.Excel.Sheets.Experimental;
-using POVPlus;
-using System.Runtime.InteropServices;
 using Dalamud.Interface.Windowing;
+using System;
+using System.Numerics;
 
 
 
@@ -38,7 +35,7 @@ public class MainWindow : Window, IDisposable
 
     private static bool ResetSliderFloat(string id, ref float val, float min, float max, float reset, string format)
     {
-        var save = false;
+        bool save = false;
 
 
         ///This is the Reset button
@@ -194,7 +191,11 @@ public class MainWindow : Window, IDisposable
         ImGui.Spacing();
         if (ImGui.Checkbox("Disable Auto-face Target in First Person", ref Plugin.P.Configuration.DisableAutoFaceTargetFirstPerson))
             plugin.Configuration.Save();
-        
+
+        ImGui.Spacing();
+        if (ImGui.Checkbox("Offset Camera when looking Behind PC", ref Plugin.P.Configuration.OffsetCameraFromXAngle))
+            plugin.Configuration.Save();
+
         ImGui.Spacing();
         ImGui.Dummy(new Vector2(0, 20));
 
@@ -220,7 +221,25 @@ public class MainWindow : Window, IDisposable
             plugin.Configuration.Save();
 
 
+#if DEBUG
+        ImGui.TextUnformatted($"Camera Mode: {GlobalVars.PlayersCamera.mode}");
+        ImGui.TextUnformatted($"CameraQuartCurrentX: {GlobalVars.CameraQuartCurrent.X}");
+        ImGui.TextUnformatted($"CameraQuartCurrentY: {GlobalVars.CameraQuartCurrent.Y}");
+        ImGui.TextUnformatted($"CameraQuartCurrentZ: {GlobalVars.CameraQuartCurrent.Z}");
+        ImGui.TextUnformatted($"CameraXRelative: {GlobalVars.CameraXRelative}");
+        ImGui.TextUnformatted($"CameraZRelative: {GlobalVars.CameraZRelative}");
+        ImGui.TextUnformatted($"gcVrotation : {GlobalVars.PlayersCamera.currentVRotation}");
+        ImGui.TextUnformatted($"gcHrotation : {GlobalVars.PlayersCamera.currentHRotation}");
+        ImGui.TextUnformatted($"PlayerRotation : {GlobalVars.Player.Rotation}");
+        ImGui.TextUnformatted($"CameraRotationDelta : {MathF.Atan2(MathF.Sin(GlobalVars.PlayersCamera.currentHRotation - GlobalVars.Player.Rotation), MathF.Cos(GlobalVars.PlayersCamera.currentHRotation - GlobalVars.Player.Rotation))}");
+        //ImGui.TextUnformatted($"CameraRotationDeltaInv : {GlobalVars.Player.Rotation - GlobalVars.PlayersCamera.currentHRotation}");
+        
+        //ImGui.Checkbox("Enable angle delta", ref GlobalVars.EnableAngleDelta);
+        //ImGui.TextUnformatted($"CameraZRelative: {GlobalVars.camera}");
+#endif
+
         ImGui.EndChild();
+
 
 
 

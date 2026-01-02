@@ -41,6 +41,7 @@ public class Configuration : IPluginConfiguration
     public bool RotationBindBoolX = false;
 
     public bool DisableAutoFaceTargetFirstPerson = false;
+    public bool OffsetCameraFromXAngle = false;
 
 
     // The below exist just to make saving less cumbersome
